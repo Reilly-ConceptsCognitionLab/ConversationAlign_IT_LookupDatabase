@@ -1,0 +1,103 @@
+---
+title: "Compiling Italian Lexical Lookup Database for ConversationAlign_IT"
+author: "Jamie Reilly, Anna Borghi, Claudia Mazzucca, Marc Brysbaert, Marco Marelli, Chiara Fini, Davide Crepaldi, Vanessa Era, Giovanna Cuomo"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 1
+    css: "https://github.com/Reilly-ConceptsCognitionLab/reillylab_publicdata/blob/main/jr_20.css?raw=true"
+---
+
+```{r setup, include=F}
+knitr::opts_chunk$set(fig.width=8, fig.height=5, fig.align = 'left', fig.path='Figs/', cache.path='Cache/', eval=T, echo=T, tidy=TRUE,  cache=F, message=F, warning=F, stringsAsFactors=F, yaml.eval.expr = TRUE)  
+
+library(xfun)
+pkg_attach("tidyverse", "here", "kableExtra", "RCurl", "knitr", "RColorBrewer", 'broom', 'purrr', 'textstem', 'tibble', 'quanteda', 'tidyr',  'quanteda.textstats', install=T)
+
+jamie.theme <- theme_bw() + theme(axis.line = element_line(colour = "black"), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank(), panel.background = element_blank(), legend.title= element_blank())  #custom theme ggplot2
+
+
+print.me <- function(x, ...) {
+if (nrow(x) > 200){
+   len <- 200 
+    } else {
+       len <- (nrow(x))
+}
+   x[1:len,] %>%
+   kbl(digits=2, align= 'l', booktabs=T) %>%
+   kable_styling(fixed_thead = T) %>%
+   kable_paper("striped", full_width = T, html_font = "Helvetica", font_size = 11) %>%
+   row_spec(0, color = "white", background = "#5b705f", font_size = 12) %>%
+   scroll_box(width = "700px", height = "500px") %>%
+   asis_output()
+}
+
+registerS3method("knit_print", "data.frame", print.me)
+```
+
+# Overview
+Our goal is to compile a lexical lookup database that contains many Italian words characterized across many formal and semantic dimensions. We need a lookup database that is light enough to be bundled within an R package but comprehensive enough to provide decent coverage across any language sample (i.e., dyadic conversation transcripts). <br>
+
+# Questions to resolve
+1. Naming conventions (e.g., phon_nletters, HumanOnly, LLM_Augmented) <br>
+
+# Base Dictionary
+We will compile a lookup database for Italian by first building on: <br>
+[Amenta et al (2025) The Italian Crowdsourcing Project: Visual word recognition times for 130,495 Italian words. Behavior Research Methods.]
+(https://link.springer.com/article/10.3758/s13428-024-02548-4)
+
+# Format the original dictionary
+1. Eliminated duplicates <br>
+2. to lowercase <br>
+3. Omitted first few entries (bound morphemes/suffixes marked by hyphens) <br>
+4. Save as RDA (optimize compression format) <br>
+5. Post to github
+```{r, eval=F}
+#read in lightly formatted dictionary data
+base_lookup <- read.csv('~/Library/CloudStorage/OneDrive-TempleUniversity/Reilly_RData/ConversationAlign_IT (dev)/data/Italian_LookupBase_Prepped26.csv')
+base_lookup <- data.frame(word=tolower(base_lookup$word))
+str(base_lookup)
+
+#Are there any duplicates? - Yes there are six duplicates in the original database. 
+#sum(duplicated(base_lookup$word))
+
+#Kill duplicates (take only first entry)
+base_lookup <- base_lookup %>% dplyr::distinct(word, .keep_all = TRUE) 
+
+#Check no dplicates
+sum(duplicated(base_lookup$word))
+
+#Save as RDA optimizing file compression, post on github 
+save(base_lookup, file='data/base_lookup.rda', compress='xz')
+
+```
+
+# Load base Italian entires 
+Read in formatted base lookup from github
+```{r}
+
+```
+
+
+# Append nletts and order dat
+Using base R count letters in each word, order lookup word first, then order cols alphabetical by prefix
+```{r}
+#compute new var and order it second in the dataframe
+dat <- dat %>% dplyr::mutate(base_nlett = nchar(word)) %>% relocate(base_nlett, .after = 1)  
+colnames(dat)
+lex_lookup25 <- dat
+str(lex_lookup25)
+```
+
+# Save output as rda and cvs for posting
+```{r, eval=T}
+write.csv(lex_lookup25, file='lookup_databases/lex_lookup25.csv')
+save(lex_lookup25, file='lookup_databases/lex_lookup25.rda')
+```
+
+
+
+
+
