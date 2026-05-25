@@ -40,6 +40,9 @@ registerS3method("knit_print", "data.frame", print.me)
 # Overview
 Our goal is to compile a lexical lookup database that contains many Italian words characterized across many formal and semantic dimensions. We need a lookup database that is light enough to be bundled within an R package but comprehensive enough to provide decent coverage across any language sample (i.e., dyadic conversation transcripts). <br>
 
+# Link to github repo
+https://github.com/Reilly-ConceptsCognitionLab/ConversationAlign_IT_LookupDatabase
+
 # Questions to resolve
 1. Naming conventions (e.g., phon_nletters, HumanOnly, LLM_Augmented) <br>
 
@@ -71,13 +74,12 @@ sum(duplicated(base_lookup$word))
 
 #Save as RDA optimizing file compression, post on github 
 save(base_lookup, file='data/base_lookup.rda', compress='xz')
-
 ```
 
 # Load base Italian entires 
-Read in formatted base lookup from github
+Read in formatted base lookup from github.
 ```{r}
-
+load(url("https://github.com/Reilly-ConceptsCognitionLab/ConversationAlign_IT_LookupDatabase/blob/main/base_lookup.rda?raw=true"))
 ```
 
 
@@ -85,14 +87,13 @@ Read in formatted base lookup from github
 Using base R count letters in each word, order lookup word first, then order cols alphabetical by prefix
 ```{r}
 #compute new var and order it second in the dataframe
-dat <- dat %>% dplyr::mutate(base_nlett = nchar(word)) %>% relocate(base_nlett, .after = 1)  
-colnames(dat)
-lex_lookup25 <- dat
-str(lex_lookup25)
+lookup_v2 <- base_lookup %>% dplyr::mutate(phon_nletters = nchar(word)) %>% relocate(phon_nletters, .after = 1)  
+str(lookup_v2)
+head(lookup_v2)
 ```
 
 # Save output as rda and cvs for posting
-```{r, eval=T}
+```{r, eval=F}
 write.csv(lex_lookup25, file='lookup_databases/lex_lookup25.csv')
 save(lex_lookup25, file='lookup_databases/lex_lookup25.rda')
 ```
